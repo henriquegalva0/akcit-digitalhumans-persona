@@ -1,9 +1,18 @@
 // ============================================================
 // CONFIGURAÇÃO — substitua pela URL do seu Google Apps Script
 // ============================================================
-// ============================================================
-// BOTÃO NOVA ANÁLISE — zera o formulário inteiro
-// ============================================================
+
+
+function verificarPasscode() {
+  const input = document.getElementById("passcode").value.trim();
+  if (input === "persona") {
+    document.getElementById("section-passcode").style.display = "none";
+    document.getElementById("main-form").style.display = "block";
+  } else {
+    document.getElementById("passcode-erro").style.display = "block";
+  }
+}
+
 function novaAnalise() {
   if (!confirm("Tem certeza? Todos os dados preenchidos serão perdidos.")) return;
  
@@ -225,15 +234,6 @@ function calcularEEnviar() {
     listaO.push(xo);
   }
 
-function verificarPasscode() {
-  const input = document.getElementById("passcode").value.trim();
-  if (input === "persona") {
-    document.getElementById("section-passcode").style.display = "none";
-    document.getElementById("main-form").style.display = "block";
-  } else {
-    document.getElementById("passcode-erro").style.display = "block";
-  }
-}
   
   // Cálculos
   const listaPt = [];
