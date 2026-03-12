@@ -1,22 +1,6 @@
 // ============================================================
 // CONFIGURAÇÃO — substitua pela URL do seu Google Apps Script
 // ============================================================
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNEFHv2PwGv9WEipFA37ll3r1kAl3K5_g7kd_5ohbfNaFHXUtTb2EhiSMpBi3xgBmO/exec";
-const PASSCODE_CORRETO = "persona";
-
-// ============================================================
-// ETAPA 0 — Verificação de passcode
-// ============================================================
-function verificarPasscode() {
-  const input = document.getElementById("passcode").value.trim();
-  if (input === PASSCODE_CORRETO) {
-    document.getElementById("section-passcode").style.display = "none";
-    document.getElementById("main-form").style.display = "block";
-  } else {
-    document.getElementById("passcode-erro").style.display = "block";
-  }
-}
- 
 // ============================================================
 // BOTÃO NOVA ANÁLISE — zera o formulário inteiro
 // ============================================================
@@ -240,7 +224,17 @@ function calcularEEnviar() {
     listaR.push(xr);
     listaO.push(xo);
   }
- 
+
+function verificarPasscode() {
+  const input = document.getElementById("passcode").value.trim();
+  if (input === "persona") {
+    document.getElementById("section-passcode").style.display = "none";
+    document.getElementById("main-form").style.display = "block";
+  } else {
+    document.getElementById("passcode-erro").style.display = "block";
+  }
+}
+  
   // Cálculos
   const listaPt = [];
   for (let i = 0; i < numTurnos; i++) {
@@ -296,7 +290,7 @@ function calcularEEnviar() {
   const statusEl = document.getElementById("status-envio");
   statusEl.textContent = "⏳ Enviando dados para o Google Sheets...";
  
-  fetch(APPS_SCRIPT_URL, {
+  fetch("https://script.google.com/macros/s/AKfycbyNEFHv2PwGv9WEipFA37ll3r1kAl3K5_g7kd_5ohbfNaFHXUtTb2EhiSMpBi3xgBmO/exec", {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
