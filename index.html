@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Persona Score — Anotador</title>
+  <script src="pscore.js" defer></script>
+</head>
+<body>
+
+  <h1>Persona Score (Pscore) — Ferramenta de Anotação</h1>
+  <p>Esta ferramenta guia você pelo preenchimento completo de uma avaliação de Persona Score. Siga cada etapa com atenção.</p>
+  <hr>
+
+  <!-- ETAPA 0: PASSCODE -->
+  <section id="section-passcode">
+    <h2>Etapa 0 — Autenticação</h2>
+    <p>Informe o passcode de acesso para liberar o formulário.</p>
+    <label for="passcode">Passcode:</label><br>
+    <input type="password" id="passcode" placeholder="Digite o passcode" />
+    <button onclick="verificarPasscode()">Entrar</button>
+    <p id="passcode-erro" style="color:red;display:none;">Passcode incorreto. Tente novamente.</p>
+  </section>
+
+  <!-- CONTEÚDO PRINCIPAL (bloqueado até passcode) -->
+  <div id="main-form" style="display:none;">
+
+    <hr>
+    <!-- ETAPA 1: DESCRIÇÃO -->
+    <section>
+      <h2>Etapa 1 — Descrição da Interação</h2>
+      <p>Escreva uma breve descrição do contexto da conversa avaliada (ex: "Persona de filósofo grego respondendo perguntas existenciais").</p>
+      <label for="descricao">Descrição:</label><br>
+      <textarea id="descricao" rows="3" cols="60" placeholder="Descreva o contexto da interação avaliada..."></textarea>
+    </section>
+
+    <hr>
+    <!-- ETAPA 2: NÚMERO DE TURNOS -->
+    <section>
+      <h2>Etapa 2 — Número de Turnos</h2>
+      <p>Informe quantos turnos de conversa a interação avaliada possui. Cada turno corresponde a um par (pergunta do usuário + resposta do agente). Após confirmar, os campos por turno serão gerados abaixo.</p>
+      <label for="num-turnos">Número de turnos:</label><br>
+      <input type="number" id="num-turnos" min="1" max="100" placeholder="Ex: 5" />
+      <button onclick="gerarTurnos()">Confirmar número de turnos</button>
+    </section>
+
+    <hr>
+    <!-- ETAPA 3: PESOS -->
+    <section>
+      <h2>Etapa 3 — Pesos das Categorias</h2>
+      <p>Defina os pesos (w) de cada dimensão de análise. A soma dos quatro pesos <strong>deve ser igual a 1</strong> (ex: 0.25 cada). Esses pesos multiplicam as notas Likert de cada categoria no cálculo do Pscore Instantâneo por Turno (Pt).</p>
+      <p>As categorias são: <strong>S</strong> (Aderência Estilística), <strong>C</strong> (Consistência Contextual), <strong>R</strong> (Resiliência Adversária), <strong>O</strong> (Estabilidade OOD).</p>
+      <label>Peso S (Aderência Estilística):</label>
+      <input type="number" id="peso-s" step="0.01" min="0" max="1" value="0.25" /><br><br>
+      <label>Peso C (Consistência Contextual):</label>
+      <input type="number" id="peso-c" step="0.01" min="0" max="1" value="0.25" /><br><br>
+      <label>Peso R (Resiliência Adversária):</label>
+      <input type="number" id="peso-r" step="0.01" min="0" max="1" value="0.25" /><br><br>
+      <label>Peso O (Estabilidade OOD):</label>
+      <input type="number" id="peso-o" step="0.01" min="0" max="1" value="0.25" /><br><br>
+      <p id="aviso-pesos" style="color:orange;display:none;">⚠️ Atenção: a soma dos pesos deve ser 1.00.</p>
+    </section>
+
+    <hr>
+    <!-- ETAPA 4: TURNOS DINÂMICOS -->
+    <section>
+      <h2>Etapa 4 — Avaliação por Turno</h2>
+      <p>Para cada turno, informe: a mensagem enviada pelo usuário, a resposta do agente, e as notas Likert (1–5) de cada categoria.</p>
+      <p><strong>Escala Likert:</strong> 5 = Exemplar | 4 = Sólido | 3 = Neutro/Instável | 2 = Falha Parcial | 1 = Colapso</p>
+      <div id="turnos-container">
+        <p><em>Os campos de turno aparecerão após você confirmar o número de turnos na Etapa 2.</em></p>
+      </div>
+    </section>
+
+    <hr>
+    <!-- ETAPA 5: METADADOS -->
+    <section>
+      <h2>Etapa 5 — Metadados da Conversa</h2>
+
+      <p><strong>URL da conversa:</strong> Cole o link direto da conversa avaliada (ex: link de um chat no Claude.ai, ChatGPT, etc.).</p>
+      <label for="url-conversa">URL da conversa:</label><br>
+      <input type="text" id="url-conversa" size="70" placeholder="https://..." /><br><br>
+
+      <p><strong>Modelo:</strong> Informe o nome do modelo de linguagem utilizado (ex: claude-opus-4, gpt-4o, gemini-1.5-pro).</p>
+      <label for="modelo">Modelo:</label><br>
+      <input type="text" id="modelo" placeholder="Ex: claude-sonnet-4" /><br><br>
+
+      <p><strong>Persona Prompt (instruções):</strong> Cole apenas as instruções da persona — sem incluir o primeiro comando/interação. Este campo descreve o comportamento que o modelo deveria seguir.</p>
+      <label for="persona-prompt">Persona Prompt (instruções):</label><br>
+      <textarea id="persona-prompt" rows="5" cols="70" placeholder="Cole aqui somente as instruções da persona..."></textarea>
+    </section>
+
+    <hr>
+    <!-- RESULTADO E SUBMISSÃO -->
+    <section>
+      <h2>Etapa 6 — Cálculo e Envio</h2>
+      <p>Ao clicar em <strong>"Calcular e Enviar"</strong>, o sistema irá:</p>
+      <ol>
+        <li>Calcular os Pscores Instantâneos por Turno (Pt) usando pesos e notas Likert;</li>
+        <li>Calcular a Taxa de Erosão (λ) via regressão linear (mínimos quadrados);</li>
+        <li>Calcular o Pscore Final com decaimento exponencial;</li>
+        <li>Enviar tudo em uma única linha para o Google Sheets.</li>
+      </ol>
+      <div id="resultados" style="display:none;">
+        <h3>Resultados Calculados</h3>
+        <div id="resultados-conteudo"></div>
+      </div>
+      <br>
+      <button onclick="calcularEEnviar()" style="font-size:1.1em;padding:8px 24px;">✅ Calcular e Enviar</button>
+      <p id="status-envio"></p>
+    </section>
+
+  </div><!-- fim main-form -->
+
+</body>
+</html>
